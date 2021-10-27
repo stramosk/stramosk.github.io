@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>untagged | Stramosk&#39;s Site</title>
+<title>untagged | stramosk&#39;s</title>
 <meta name="keywords" content="" />
 <meta name="description" content="">
 <meta name="author" content="">
@@ -28,34 +28,6 @@
         }
 
     </style>
-    <style>
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --theme: rgb(29, 30, 32);
-                --entry: rgb(46, 46, 51);
-                --primary: rgb(218, 218, 219);
-                --secondary: rgb(155, 156, 157);
-                --tertiary: rgb(65, 66, 68);
-                --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
-                --code-bg: rgb(55, 56, 62);
-                --border: rgb(51, 51, 51);
-            }
-
-            .list {
-                background: var(--theme);
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
-            }
-        }
-
-    </style>
 </noscript><meta property="og:title" content="untagged" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
@@ -67,14 +39,10 @@
 
 </head>
 
-<body class="list" id="top">
+<body class="list dark" id="top">
 <script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
+    if (localStorage.getItem("pref-theme") === "light") {
         document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
     }
 
 </script>
@@ -82,7 +50,7 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://stramosk.com/" accesskey="h" title="Stramosk&#39;s Site (Alt + H)">Stramosk&#39;s Site</a>
+            <a href="https://stramosk.com/" accesskey="h" title="stramosk&#39;s (Alt + H)">stramosk&#39;s</a>
             <span class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -107,11 +75,21 @@
             </span>
         </div>
         <ul id="menu">
+            <li>
+                <a href="https://stramosk.com/categories/" title="categories">
+                    <span>categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://stramosk.com/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
         </ul>
     </nav>
 </header>
 <main class="main"> 
-<header class="page-header">
+<header class="page-header"><div class="breadcrumbs"><a href="https://stramosk.com/">Home</a>&nbsp;»&nbsp;<a href="https://stramosk.com/tags/">Tags</a></div>
   <h1>untagged</h1>
 </header>
 
@@ -123,13 +101,13 @@
   <section class="entry-content">
     <p>This is some content</p>
   </section>
-  <footer class="entry-footer">October 27, 2021</footer>
+  <footer class="entry-footer">October 27, 2021&nbsp;·&nbsp;1 min</footer>
   <a class="entry-link" aria-label="post link to Welcome" href="https://stramosk.com/posts/welcome/"></a>
 </article>
     </main>
     
 <footer class="footer">
-    <span>&copy; 2021 <a href="https://stramosk.com/">Stramosk&#39;s Site</a></span>
+    <span>&copy; 2021 <a href="https://stramosk.com/">stramosk&#39;s</a></span>
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
