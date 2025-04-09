@@ -30,6 +30,12 @@ jobs:
         run: npm ci
         
       - name: Build project
+        env:
+          NEXT_PUBLIC_GITHUB_API_KEY: ${{ secrets.GITHUB_API_KEY }}
+          NEXT_PUBLIC_ANALYTICS_ID: ${{ secrets.ANALYTICS_ID }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          NEXT_PUBLIC_ENABLE_ANALYTICS: 'true'
+          NEXT_PUBLIC_ENABLE_EXPERIMENTAL: 'false'
         run: npm run build
         
       - name: Upload artifact
