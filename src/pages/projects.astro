@@ -1,0 +1,148 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+---
+
+<Layout title="Projects & Portfolio - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-5xl md:text-6xl font-bold mb-4 text-white glitch" data-text="PROJECTS & PORTFOLIO">
+          PROJECTS & PORTFOLIO
+        </h1>
+        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+          A collection of projects showcasing my skills in software development, 
+          mathematics, and creative problem-solving.
+        </p>
+      </div>
+
+      <!-- Featured Projects -->
+      <div class="mb-16">
+        <h2 class="text-3xl font-bold text-white mb-8 text-center">FEATURED PROJECTS</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="btn-terminal">
+            <div class="terminal-window p-8 h-full hover-lift">
+              <div class="flex items-center justify-between mb-6">
+                <span class="text-4xl">🧮</span>
+                <span class="text-sm bg-white text-black px-3 py-1 rounded font-bold">
+                  FEATURED
+                </span>
+              </div>
+              
+              <h3 class="text-2xl font-bold mb-4 text-white">
+                Mathematical Visualizations
+              </h3>
+              
+              <p class="text-gray-300 text-base leading-relaxed mb-6">
+                Interactive web-based mathematical simulations including chaos theory, fractals, and particle systems.
+              </p>
+              
+              <div class="mb-6">
+                <h4 class="text-white font-semibold mb-2">Technologies:</h4>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Three.js</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">WebGL</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">React</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">TypeScript</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Mathematics</span>
+                </div>
+              </div>
+              
+              <div class="text-white text-sm font-mono opacity-70">
+                [COMING SOON] →
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-terminal">
+            <div class="terminal-window p-8 h-full hover-lift">
+              <div class="flex items-center justify-between mb-6">
+                <span class="text-4xl">💻</span>
+                <span class="text-sm bg-white text-black px-3 py-1 rounded font-bold">
+                  FEATURED
+                </span>
+              </div>
+              
+              <h3 class="text-2xl font-bold mb-4 text-white">
+                Terminal Portfolio
+              </h3>
+              
+              <p class="text-gray-300 text-base leading-relaxed mb-6">
+                This website - a retro terminal-style portfolio built with modern web technologies.
+              </p>
+              
+              <div class="mb-6">
+                <h4 class="text-white font-semibold mb-2">Technologies:</h4>
+                <div class="flex flex-wrap gap-2">
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Astro</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Tailwind CSS</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Vanilla JS</span>
+                  <span class="px-3 py-1 bg-white/20 border border-white/30 text-white text-sm rounded">Terminal UI</span>
+                </div>
+              </div>
+              
+              <div class="text-white text-sm font-mono opacity-70">
+                [CURRENT PROJECT] →
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Section -->
+      <div class="mt-20">
+        <div class="terminal-window p-8 max-w-6xl mx-auto">
+          <div class="terminal-header mb-8">
+            TECHNICAL SKILLS & EXPERTISE
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 class="text-lg font-bold text-white mb-4">Frontend Development</h4>
+              <ul class="space-y-2 text-gray-300 text-sm">
+                <li>• React & Next.js ecosystem</li>
+                <li>• TypeScript & JavaScript</li>
+                <li>• Three.js & WebGL</li>
+                <li>• Tailwind CSS & Styled Components</li>
+                <li>• Responsive design & animations</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold text-white mb-4">Backend & DevOps</h4>
+              <ul class="space-y-2 text-gray-300 text-sm">
+                <li>• Node.js & Express</li>
+                <li>• Python & scientific computing</li>
+                <li>• Database design & optimization</li>
+                <li>• Docker & cloud deployment</li>
+                <li>• API design & microservices</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold text-white mb-4">Specialized Domains</h4>
+              <ul class="space-y-2 text-gray-300 text-sm">
+                <li>• Mathematical modeling</li>
+                <li>• Data visualization</li>
+                <li>• Computer graphics</li>
+                <li>• Algorithm optimization</li>
+                <li>• Machine learning basics</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-16 text-white text-sm">
+        <div class="text-muted">
+          PROJECTS PORTFOLIO v2.0.1 | 
+          <span class="ml-2">STATUS: ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

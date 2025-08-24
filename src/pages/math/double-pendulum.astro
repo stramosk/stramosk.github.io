@@ -1,0 +1,488 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+---
+
+<Layout title="Double Pendulum Simulation - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3 text-white glitch" data-text="DOUBLE PENDULUM SIMULATION">
+          DOUBLE PENDULUM SIMULATION
+        </h1>
+        <p class="text-lg text-gray-300 max-w-3xl mx-auto">
+          A chaotic system of two connected pendulums demonstrating sensitive dependence on initial conditions.
+          Small changes in starting positions lead to dramatically different trajectories.
+        </p>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="terminal-window p-6 max-w-4xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          CONTROL PANEL
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-white text-sm mb-2">Length 1 (dm)</label>
+            <input type="range" id="length1" min="50" max="150" value="100" class="w-full">
+            <span id="length1Value" class="text-white text-sm">10.0</span>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Length 2 (dm)</label>
+            <input type="range" id="length2" min="50" max="150" value="100" class="w-full">
+            <span id="length2Value" class="text-white text-sm">10.0</span>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Mass 1 (kg)</label>
+            <input type="range" id="mass1" min="1" max="5" value="2" step="0.1" class="w-full">
+            <span id="mass1Value" class="text-white text-sm">2.0</span>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Mass 2 (kg)</label>
+            <input type="range" id="mass2" min="1" max="5" value="2" step="0.1" class="w-full">
+            <span id="mass2Value" class="text-white text-sm">2.0</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+          <div>
+            <label class="block text-white text-sm mb-2">Angle 1 (deg)</label>
+            <input type="range" id="angle1" min="-180" max="180" value="45" class="w-full">
+            <span id="angle1Value" class="text-white text-sm">45°</span>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Angle 2 (deg)</label>
+            <input type="range" id="angle2" min="-180" max="180" value="45" class="w-full">
+            <span id="angle2Value" class="text-white text-sm">45°</span>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Gravity (m/s²)</label>
+            <input type="range" id="gravity" min="5" max="15" value="9.81" step="0.1" class="w-full">
+            <span id="gravityValue" class="text-white text-sm">9.81</span>
+          </div>
+          <div class="flex items-end">
+            <button id="startBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2">
+              Start
+            </button>
+            <button id="pauseBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mr-2">
+              Pause
+            </button>
+            <button id="resetBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="terminal-window p-6 max-w-6xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          SIMULATION VIEW
+        </div>
+        <div class="flex justify-center">
+          <canvas id="doublePendulumCanvas" width="800" height="600" class="border border-white/30 bg-black"></canvas>
+        </div>
+      </div>
+
+      <!-- Information Panels -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- Physics Equations -->
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            PHYSICS EQUATIONS
+          </div>
+          <div class="text-gray-300 text-sm space-y-3">
+            <p>The double pendulum is described by coupled differential equations:</p>
+            <div class="bg-white/10 p-3 rounded font-mono text-xs">
+              <p>θ₁'' = (m₂g sin θ₂ cos(θ₁-θ₂) - m₂ sin(θ₁-θ₂)(l₁θ₁'² cos(θ₁-θ₂) + l₂θ₂'²) - (m₁+m₂)g sin θ₁) / (l₁(m₁ + m₂ sin²(θ₁-θ₂)))</p>
+              <p>θ₂'' = (m₂ sin(θ₁-θ₂)(l₁θ₁'² + g cos θ₁) + (m₁+m₂)(l₁θ₁'² sin(θ₁-θ₂) - g sin θ₂)) / (l₂(m₁ + m₂ sin²(θ₁-θ₂)))</p>
+            </div>
+            <p>Where θ₁, θ₂ are the angles, l₁, l₂ are the lengths, and m₁, m₂ are the masses.</p>
+          </div>
+        </div>
+
+        <!-- Real-time Data -->
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            REAL-TIME DATA
+          </div>
+          <div class="text-gray-300 text-sm space-y-2">
+            <div class="flex justify-between">
+              <span>Angle 1:</span>
+              <span id="currentAngle1" class="text-white">0.00°</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Angle 2:</span>
+              <span id="currentAngle2" class="text-white">0.00°</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Angular Velocity 1:</span>
+              <span id="currentVelocity1" class="text-white">0.00 rad/s</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Angular Velocity 2:</span>
+              <span id="currentVelocity2" class="text-white">0.00 rad/s</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Total Energy:</span>
+              <span id="totalEnergy" class="text-white">0.00 J</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Simulation Time:</span>
+              <span id="simTime" class="text-white">0.00s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chaos Theory Explanation -->
+      <div class="terminal-window p-6 max-w-4xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          CHAOS THEORY
+        </div>
+        <div class="text-gray-300 text-sm space-y-3">
+          <p>The double pendulum is a classic example of a chaotic system. It exhibits:</p>
+          <ul class="list-disc list-inside space-y-1 ml-4">
+            <li><strong>Sensitive Dependence on Initial Conditions:</strong> Tiny changes in starting positions lead to completely different trajectories</li>
+            <li><strong>Deterministic Chaos:</strong> The system is completely predictable in theory, but practically unpredictable due to numerical precision limits</li>
+            <li><strong>Strange Attractors:</strong> The system tends to explore certain regions of phase space more than others</li>
+            <li><strong>Energy Conservation:</strong> Total mechanical energy remains constant (ignoring friction)</li>
+          </ul>
+          <p>This demonstrates why long-term weather prediction is so difficult - small measurement errors compound exponentially over time.</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-16 text-white text-sm">
+        <div class="text-muted">
+          DOUBLE PENDULUM SIMULATION v2.0.1 | 
+          <span class="ml-2">RENDERING ENGINE: HTML5 CANVAS</span> |
+          <span class="ml-2">STATUS: ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  class DoublePendulumSimulation {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private animationId: number | null = null;
+    private isRunning: boolean = false;
+    private startTime: number = 0;
+    private currentTime: number = 0;
+
+    // Physics parameters
+    private length1: number = 100;
+    private length2: number = 100;
+    private mass1: number = 2;
+    private mass2: number = 2;
+    private gravity: number = 9.81;
+    private angle1: number = 45 * Math.PI / 180;
+    private angle2: number = 45 * Math.PI / 180;
+    private angularVelocity1: number = 0;
+    private angularVelocity2: number = 0;
+
+          // Display parameters
+      private scale: number = 4.0; // pixels per meter (much larger, more impressive)
+      private centerX: number = 400;
+      private centerY: number = 200;
+
+    constructor() {
+      this.canvas = document.getElementById('doublePendulumCanvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupEventListeners();
+      this.draw();
+    }
+
+    private setupEventListeners(): void {
+      // Control inputs
+      const length1Input = document.getElementById('length1') as HTMLInputElement;
+      const length2Input = document.getElementById('length2') as HTMLInputElement;
+      const mass1Input = document.getElementById('mass1') as HTMLInputElement;
+      const mass2Input = document.getElementById('mass2') as HTMLInputElement;
+      const angle1Input = document.getElementById('angle1') as HTMLInputElement;
+      const angle2Input = document.getElementById('angle2') as HTMLInputElement;
+      const gravityInput = document.getElementById('gravity') as HTMLInputElement;
+
+      // Display values
+      const length1Value = document.getElementById('length1Value') as HTMLElement;
+      const length2Value = document.getElementById('length2Value') as HTMLElement;
+      const mass1Value = document.getElementById('mass1Value') as HTMLElement;
+      const mass2Value = document.getElementById('mass2Value') as HTMLElement;
+      const angle1Value = document.getElementById('angle1Value') as HTMLElement;
+      const angle2Value = document.getElementById('angle2Value') as HTMLElement;
+      const gravityValue = document.getElementById('gravityValue') as HTMLElement;
+
+      // Buttons
+      const startBtn = document.getElementById('startBtn') as HTMLButtonElement;
+      const pauseBtn = document.getElementById('pauseBtn') as HTMLButtonElement;
+      const resetBtn = document.getElementById('resetBtn') as HTMLButtonElement;
+
+      // Input event listeners
+      length1Input.addEventListener('input', (e) => {
+        this.length1 = Number((e.target as HTMLInputElement).value);
+        length1Value.textContent = (this.length1 / 10).toFixed(1);
+        this.draw();
+      });
+
+      length2Input.addEventListener('input', (e) => {
+        this.length2 = Number((e.target as HTMLInputElement).value);
+        length2Value.textContent = (this.length2 / 10).toFixed(1);
+        this.draw();
+      });
+
+      mass1Input.addEventListener('input', (e) => {
+        this.mass1 = Number((e.target as HTMLInputElement).value);
+        mass1Value.textContent = this.mass1.toFixed(1);
+      });
+
+      mass2Input.addEventListener('input', (e) => {
+        this.mass2 = Number((e.target as HTMLInputElement).value);
+        mass2Value.textContent = this.mass2.toFixed(1);
+      });
+
+      angle1Input.addEventListener('input', (e) => {
+        this.angle1 = Number((e.target as HTMLInputElement).value) * Math.PI / 180;
+        angle1Value.textContent = `${Math.round(this.angle1 * 180 / Math.PI)}°`;
+        this.draw();
+      });
+
+      angle2Input.addEventListener('input', (e) => {
+        this.angle2 = Number((e.target as HTMLInputElement).value) * Math.PI / 180;
+        angle2Value.textContent = `${Math.round(this.angle2 * 180 / Math.PI)}°`;
+        this.draw();
+      });
+
+      gravityInput.addEventListener('input', (e) => {
+        this.gravity = Number((e.target as HTMLInputElement).value);
+        gravityValue.textContent = this.gravity.toFixed(2);
+      });
+
+      // Button event listeners
+      startBtn.addEventListener('click', () => this.start());
+      pauseBtn.addEventListener('click', () => this.pause());
+      resetBtn.addEventListener('click', () => this.reset());
+    }
+
+    public start(): void {
+      if (!this.isRunning) {
+        this.isRunning = true;
+        this.startTime = performance.now();
+        this.animate();
+      }
+    }
+
+    public pause(): void {
+      this.isRunning = false;
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+        this.animationId = null;
+      }
+    }
+
+    public reset(): void {
+      this.pause();
+      this.angle1 = 45 * Math.PI / 180;
+      this.angle2 = 45 * Math.PI / 180;
+      this.angularVelocity1 = 0;
+      this.angularVelocity2 = 0;
+      this.currentTime = 0;
+      this.startTime = 0;
+      this.updateDisplays();
+      this.draw();
+    }
+
+    private animate(): void {
+      if (!this.isRunning) return;
+
+      const deltaTime = 0.016; // 60 FPS
+      this.updatePhysics(deltaTime);
+      this.updateDisplays();
+      this.draw();
+
+      this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    private updatePhysics(deltaTime: number): void {
+      // Update simulation time
+      this.currentTime += deltaTime;
+
+      // Calculate accelerations using the double pendulum equations
+      const g = this.gravity;
+      const l1 = this.length1 / 10;
+      const l2 = this.length2 / 10;
+      const m1 = this.mass1;
+      const m2 = this.mass2;
+
+      const delta = this.angle1 - this.angle2;
+      const sinDelta = Math.sin(delta);
+      const cosDelta = Math.cos(delta);
+
+      // Angular acceleration for pendulum 1
+      const numerator1 = m2 * g * Math.sin(this.angle2) * cosDelta - 
+                        m2 * sinDelta * (l1 * this.angularVelocity1 * this.angularVelocity1 * cosDelta + 
+                                        l2 * this.angularVelocity2 * this.angularVelocity2) - 
+                        (m1 + m2) * g * Math.sin(this.angle1);
+      const denominator1 = l1 * (m1 + m2 * sinDelta * sinDelta);
+      const angularAcceleration1 = numerator1 / denominator1;
+
+      // Angular acceleration for pendulum 2
+      const numerator2 = m2 * sinDelta * (l1 * this.angularVelocity1 * this.angularVelocity1 + g * Math.cos(this.angle1)) + 
+                        (m1 + m2) * (l1 * this.angularVelocity1 * this.angularVelocity1 * sinDelta - g * Math.sin(this.angle2));
+      const denominator2 = l2 * (m1 + m2 * sinDelta * sinDelta);
+      const angularAcceleration2 = numerator2 / denominator2;
+
+      // Update velocities and angles
+      this.angularVelocity1 += angularAcceleration1 * deltaTime;
+      this.angularVelocity2 += angularAcceleration2 * deltaTime;
+      this.angle1 += this.angularVelocity1 * deltaTime;
+      this.angle2 += this.angularVelocity2 * deltaTime;
+    }
+
+    private updateDisplays(): void {
+      const currentAngle1 = document.getElementById('currentAngle1') as HTMLElement;
+      const currentAngle2 = document.getElementById('currentAngle2') as HTMLElement;
+      const currentVelocity1 = document.getElementById('currentVelocity1') as HTMLElement;
+      const currentVelocity2 = document.getElementById('currentVelocity2') as HTMLElement;
+      const totalEnergy = document.getElementById('totalEnergy') as HTMLElement;
+      const simTime = document.getElementById('simTime') as HTMLElement;
+
+      currentAngle1.textContent = `${(this.angle1 * 180 / Math.PI).toFixed(2)}°`;
+      currentAngle2.textContent = `${(this.angle2 * 180 / Math.PI).toFixed(2)}°`;
+      currentVelocity1.textContent = `${this.angularVelocity1.toFixed(2)} rad/s`;
+      currentVelocity2.textContent = `${this.angularVelocity2.toFixed(2)} rad/s`;
+      simTime.textContent = `${this.currentTime.toFixed(2)}s`;
+
+      // Calculate total energy (kinetic + potential)
+      const l1 = this.length1 / 10;
+      const l2 = this.length2 / 10;
+      const m1 = this.mass1;
+      const m2 = this.mass2;
+      const g = this.gravity;
+
+      // Kinetic energy
+      const v1 = l1 * this.angularVelocity1;
+      const v2 = Math.sqrt(
+        Math.pow(l1 * this.angularVelocity1, 2) + 
+        Math.pow(l2 * this.angularVelocity2, 2) + 
+        2 * l1 * l2 * this.angularVelocity1 * this.angularVelocity2 * Math.cos(this.angle1 - this.angle2)
+      );
+      const kineticEnergy = 0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2;
+
+      // Potential energy
+      const height1 = l1 * (1 - Math.cos(this.angle1));
+      const height2 = l1 * (1 - Math.cos(this.angle1)) + l2 * (1 - Math.cos(this.angle2));
+      const potentialEnergy = m1 * g * height1 + m2 * g * height2;
+
+      const total = kineticEnergy + potentialEnergy;
+      totalEnergy.textContent = `${total.toFixed(2)} J`;
+    }
+
+    private draw(): void {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Draw grid
+      this.drawGrid();
+      
+      // Draw pendulum
+      this.drawPendulum();
+    }
+
+    private drawGrid(): void {
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      this.ctx.lineWidth = 1;
+
+      // Vertical grid lines
+      for (let x = 0; x <= this.canvas.width; x += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, 0);
+        this.ctx.lineTo(x, this.canvas.height);
+        this.ctx.stroke();
+      }
+
+      // Horizontal grid lines
+      for (let y = 0; y <= this.canvas.height; y += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, y);
+        this.ctx.lineTo(this.canvas.width, y);
+        this.ctx.stroke();
+      }
+    }
+
+    private drawPendulum(): void {
+      const l1 = this.length1 / 10 * this.scale;
+      const l2 = this.length2 / 10 * this.scale;
+
+      // Calculate positions
+      const x1 = this.centerX + l1 * Math.sin(this.angle1);
+      const y1 = this.centerY + l1 * Math.cos(this.angle1);
+      const x2 = x1 + l2 * Math.sin(this.angle2);
+      const y2 = y1 + l2 * Math.cos(this.angle2);
+
+              // Draw pivot point
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.beginPath();
+        this.ctx.arc(this.centerX, this.centerY, 8, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+              // Draw first pendulum arm
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.centerX, this.centerY);
+        this.ctx.lineTo(x1, y1);
+        this.ctx.stroke();
+
+              // Draw first bob
+        this.ctx.fillStyle = 'rgba(255, 100, 100, 0.8)';
+        this.ctx.beginPath();
+        this.ctx.arc(x1, y1, 12, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+      // Draw second pendulum arm
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      this.ctx.lineWidth = 4;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
+
+      // Draw second bob
+      this.ctx.fillStyle = 'rgba(100, 100, 255, 0.8)';
+      this.ctx.beginPath();
+      this.ctx.arc(x2, y2, 12, 0, 2 * Math.PI);
+      this.ctx.fill();
+
+      // Draw trajectory trail for second bob
+      this.ctx.strokeStyle = 'rgba(100, 100, 255, 0.5)';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x2, y2);
+      
+      // Simple trail effect
+      for (let i = 1; i <= 20; i++) {
+        const timeOffset = i * 0.016;
+        const trailAngle1 = this.angle1 - this.angularVelocity1 * timeOffset;
+        const trailAngle2 = this.angle2 - this.angularVelocity2 * timeOffset;
+        const trailX1 = this.centerX + l1 * Math.sin(trailAngle1);
+        const trailY1 = this.centerY + l1 * Math.cos(trailAngle1);
+        const trailX2 = trailX1 + l2 * Math.sin(trailAngle2);
+        const trailY2 = trailY1 + l2 * Math.cos(trailAngle2);
+        this.ctx.lineTo(trailX2, trailY2);
+      }
+      this.ctx.stroke();
+    }
+  }
+
+  // Initialize simulation when page loads
+  window.addEventListener('load', () => {
+    new DoublePendulumSimulation();
+  });
+</script>

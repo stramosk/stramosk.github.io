@@ -1,0 +1,167 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+---
+
+<Layout title="Mathematical Visualizations - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold mb-3 text-white glitch" data-text="MATHEMATICAL VISUALIZATIONS">
+          MATHEMATICAL VISUALIZATIONS
+        </h1>
+        <p class="text-lg text-gray-300 max-w-3xl mx-auto">
+          Interactive explorations of chaos theory, fractals, and mathematical beauty.
+          Each visualization demonstrates both mathematical concepts and programming skills.
+        </p>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="mb-8">
+        <div class="terminal-window p-4 max-w-2xl mx-auto">
+          <div class="terminal-header mb-4">
+            FILTER BY CATEGORY
+          </div>
+          <div class="flex flex-wrap gap-2 justify-center">
+            {['All', 'Chaos Theory', 'Fractals'].map((category) => (
+              <button
+                class="px-4 py-2 bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-colors rounded"
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="btn-terminal">
+          <div class="terminal-window p-6 h-full hover-lift">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-3xl">⚖️</span>
+              <span class="text-xs bg-white/20 text-white px-2 py-1 rounded border border-white/30">
+                Chaos Theory
+              </span>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-3 text-white">
+              Double Pendulum Simulation
+            </h3>
+            
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Interactive double pendulum demonstrating chaotic behavior and sensitive dependence on initial conditions
+            </p>
+            
+            <div class="mt-4">
+              <a href="/math/double-pendulum" class="inline-block bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+                EXPLORE NOW →
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="btn-terminal">
+          <div class="terminal-window p-6 h-full hover-lift">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-3xl">🌀</span>
+              <span class="text-xs bg-white/20 text-white px-2 py-1 rounded border border-white/30">
+                Chaos Theory
+              </span>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-3 text-white">
+              Lorenz Attractor
+            </h3>
+            
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Explore the famous chaotic system with interactive controls
+            </p>
+            
+            <div class="mt-4">
+              <a href="/math/lorenz-attractor" class="inline-block bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+                EXPLORE NOW →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-terminal">
+          <div class="terminal-window p-6 h-full hover-lift">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-3xl">🌀</span>
+              <span class="text-xs bg-white/20 text-white px-2 py-1 rounded border border-white/30">
+                Fractals
+              </span>
+            </div>
+            
+            <h3 class="text-xl font-bold mb-3 text-white">
+              Mandelbrot Set
+            </h3>
+            
+            <p class="text-gray-300 text-sm leading-relaxed">
+              Interactive Mandelbrot fractal explorer with zoom, color mapping, and real-time controls
+            </p>
+            
+            <div class="mt-4">
+              <a href="/math/mandelbrot" class="inline-block bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+                EXPLORE NOW →
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+
+
+      </div>
+
+      <!-- Info Section -->
+      <div class="mt-16">
+        <div class="terminal-window p-8 max-w-4xl mx-auto">
+          <div class="terminal-header mb-6">
+            TECHNICAL SPECIFICATIONS
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h4 class="text-lg font-bold text-white mb-3">Technologies Used</h4>
+              <ul class="space-y-2 text-gray-300 text-sm">
+                <li>• HTML5 Canvas for 2D graphics</li>
+                <li>• Vanilla JavaScript for interactivity</li>
+                <li>• TypeScript for type safety</li>
+                <li>• Mathematical algorithms in JavaScript</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="text-lg font-bold text-white mb-3">Mathematical Concepts</h4>
+              <ul class="space-y-2 text-gray-300 text-sm">
+                <li>• Differential equations</li>
+                <li>• Chaos theory & attractors</li>
+                <li>• Fractal geometry</li>
+                <li>• Physics simulations</li>
+                <li>• Real-time rendering</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-16 text-white text-sm">
+        <div class="text-muted">
+          MATHEMATICAL VISUALIZATIONS v2.0.1 | 
+          <span class="ml-2">RENDERING ENGINE: HTML5 CANVAS</span> |
+          <span class="ml-2">STATUS: ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

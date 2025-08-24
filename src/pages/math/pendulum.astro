@@ -1,0 +1,343 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+---
+
+<Layout title="Pendulum Simulation - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white glitch" data-text="PENDULUM SIMULATION">
+          PENDULUM SIMULATION
+        </h1>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+          Explore the physics of simple harmonic motion with an interactive pendulum.
+          Adjust parameters and observe how they affect the motion.
+        </p>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="terminal-window p-6 max-w-4xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          CONTROL PANEL
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-white text-sm mb-2">Length (m)</label>
+            <input type="range" id="length" min="0.5" max="3" step="0.1" value="1" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="lengthValue">1.0 m</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Mass (kg)</label>
+            <input type="range" id="mass" min="0.1" max="2" step="0.1" value="1" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="massValue">1.0 kg</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Gravity (m/s²)</label>
+            <input type="range" id="gravity" min="1" max="20" step="0.5" value="9.81" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="gravityValue">9.81 m/s²</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Initial Angle (°)</label>
+            <input type="range" id="initialAngle" min="0" max="90" step="5" value="45" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="angleValue">45°</div>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="startBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Start
+          </button>
+          <button id="pauseBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Pause
+          </button>
+          <button id="resetBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Simulation Canvas -->
+      <div class="terminal-window p-4 max-w-4xl mx-auto">
+        <div class="terminal-header mb-4">
+          SIMULATION CANVAS
+        </div>
+        <div class="relative">
+          <canvas id="pendulumCanvas" class="w-full border border-white/20 rounded" style="height: 400px;"></canvas>
+          <div class="absolute top-2 left-2 bg-black/80 text-white text-xs p-2 rounded font-mono">
+            Real-time physics simulation
+          </div>
+        </div>
+      </div>
+
+      <!-- Physics Information -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            PHYSICS EQUATIONS
+          </div>
+          <div class="text-gray-300 text-sm space-y-3">
+            <p>
+              The period of a simple pendulum is given by:
+              <span class="text-white font-mono">T = 2π√(L/g)</span>
+            </p>
+            <p>
+              Where <span class="text-white font-mono">L</span> is the length and 
+              <span class="text-white font-mono">g</span> is the acceleration due to gravity.
+            </p>
+            <p>
+              The motion follows simple harmonic motion for small angles (θ &lt; 15°).
+            </p>
+          </div>
+        </div>
+
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            REAL-TIME DATA
+          </div>
+          <div class="text-gray-300 text-sm space-y-2">
+            <div>• <span class="text-white">Period:</span> <span id="periodDisplay" class="text-white">0.00 s</span></div>
+            <div>• <span class="text-white">Frequency:</span> <span id="frequencyDisplay" class="text-white">0.00 Hz</span></div>
+            <div>• <span class="text-white">Current Angle:</span> <span id="angleDisplay" class="text-white">0.00°</span></div>
+            <div>• <span class="text-white">Angular Velocity:</span> <span id="velocityDisplay" class="text-white">0.00 rad/s</span></div>
+            <div>• <span class="text-white">Energy:</span> <span id="energyDisplay" class="text-white">0.00 J</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="text-center mt-8">
+        <a href="/math" class="inline-block bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded border border-white/30 transition-colors">
+          ← Back to Math Visualizations
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  class PendulumSimulation {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private animationId: number = 0;
+    
+    private length: number = 1.0;
+    private mass: number = 1.0;
+    private gravity: number = 9.81;
+    private initialAngle: number = 45;
+    
+    private angle: number = 0;
+    private angularVelocity: number = 0;
+    private time: number = 0;
+    private isRunning: boolean = false;
+    
+    private centerX: number = 0;
+    private centerY: number = 0;
+    private bobX: number = 0;
+    private bobY: number = 0;
+
+    constructor() {
+      this.canvas = document.getElementById('pendulumCanvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+      this.setupEventListeners();
+      this.reset();
+      this.draw();
+    }
+
+    private setupCanvas() {
+      const rect = this.canvas.getBoundingClientRect();
+      this.canvas.width = rect.width;
+      this.canvas.height = 400;
+      
+      this.centerX = this.canvas.width / 2;
+      this.centerY = 100;
+    }
+
+    private setupEventListeners() {
+      // Control sliders
+      document.getElementById('length')?.addEventListener('input', (e) => {
+        this.length = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('lengthValue')!.textContent = `${this.length.toFixed(1)} m`;
+        this.reset();
+      });
+      
+      document.getElementById('mass')?.addEventListener('input', (e) => {
+        this.mass = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('massValue')!.textContent = `${this.mass.toFixed(1)} kg`;
+      });
+      
+      document.getElementById('gravity')?.addEventListener('input', (e) => {
+        this.gravity = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('gravityValue')!.textContent = `${this.gravity.toFixed(2)} m/s²`;
+        this.reset();
+      });
+      
+      document.getElementById('initialAngle')?.addEventListener('input', (e) => {
+        this.initialAngle = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('angleValue')!.textContent = `${this.initialAngle}°`;
+        this.reset();
+      });
+      
+      // Control buttons
+      document.getElementById('startBtn')?.addEventListener('click', () => this.start());
+      document.getElementById('pauseBtn')?.addEventListener('click', () => this.pause());
+      document.getElementById('resetBtn')?.addEventListener('click', () => this.reset());
+    }
+
+    private start() {
+      if (!this.isRunning) {
+        this.isRunning = true;
+        this.animate();
+      }
+    }
+
+    private pause() {
+      this.isRunning = false;
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+      }
+    }
+
+    private reset() {
+      this.pause();
+      this.angle = (this.initialAngle * Math.PI) / 180;
+      this.angularVelocity = 0;
+      this.time = 0;
+      this.updateBobPosition();
+      this.updateDisplays();
+      this.draw();
+    }
+
+    private animate() {
+      if (!this.isRunning) return;
+      
+      const dt = 1/60; // 60 FPS
+      this.time += dt;
+      
+      // Update physics
+      this.updatePhysics(dt);
+      this.updateBobPosition();
+      this.updateDisplays();
+      
+      // Draw
+      this.draw();
+      
+      this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    private updatePhysics(dt: number) {
+      // Simple pendulum equation: d²θ/dt² + (g/L)sin(θ) = 0
+      const angularAcceleration = -(this.gravity / this.length) * Math.sin(this.angle);
+      
+      this.angularVelocity += angularAcceleration * dt;
+      this.angle += this.angularVelocity * dt;
+    }
+
+    private updateBobPosition() {
+      this.bobX = this.centerX + this.length * 100 * Math.sin(this.angle);
+      this.bobY = this.centerY + this.length * 100 * Math.cos(this.angle);
+    }
+
+    private updateDisplays() {
+      const period = 2 * Math.PI * Math.sqrt(this.length / this.gravity);
+      const frequency = 1 / period;
+      const currentAngleDeg = (this.angle * 180) / Math.PI;
+      const energy = this.mass * this.gravity * this.length * (1 - Math.cos(this.angle));
+      
+      document.getElementById('periodDisplay')!.textContent = `${period.toFixed(2)} s`;
+      document.getElementById('frequencyDisplay')!.textContent = `${frequency.toFixed(2)} Hz`;
+      document.getElementById('angleDisplay')!.textContent = `${currentAngleDeg.toFixed(2)}°`;
+      document.getElementById('velocityDisplay')!.textContent = `${this.angularVelocity.toFixed(2)} rad/s`;
+      document.getElementById('energyDisplay')!.textContent = `${energy.toFixed(2)} J`;
+    }
+
+    private draw() {
+      // Clear canvas
+      this.ctx.fillStyle = '#000000';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Draw grid
+      this.drawGrid();
+      
+      // Draw pendulum
+      this.drawPendulum();
+      
+      // Draw trajectory
+      this.drawTrajectory();
+    }
+
+    private drawGrid() {
+      this.ctx.strokeStyle = '#333333';
+      this.ctx.lineWidth = 1;
+      
+      // Vertical lines
+      for (let x = 0; x < this.canvas.width; x += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, 0);
+        this.ctx.lineTo(x, this.canvas.height);
+        this.ctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = 0; y < this.canvas.height; y += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, y);
+        this.ctx.lineTo(this.canvas.width, y);
+        this.ctx.stroke();
+      }
+    }
+
+    private drawPendulum() {
+      // Draw string
+      this.ctx.strokeStyle = '#ffffff';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.centerX, this.centerY);
+      this.ctx.lineTo(this.bobX, this.bobY);
+      this.ctx.stroke();
+      
+      // Draw pivot point
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.beginPath();
+      this.ctx.arc(this.centerX, this.centerY, 8, 0, 2 * Math.PI);
+      this.ctx.fill();
+      
+      // Draw bob
+      this.ctx.fillStyle = '#ff6b6b';
+      this.ctx.beginPath();
+      this.ctx.arc(this.bobX, this.bobY, 20, 0, 2 * Math.PI);
+      this.ctx.fill();
+      
+      // Draw bob outline
+      this.ctx.strokeStyle = '#ffffff';
+      this.ctx.lineWidth = 2;
+      this.ctx.stroke();
+    }
+
+    private drawTrajectory() {
+      // Draw a simple trajectory indicator
+      this.ctx.strokeStyle = '#ffffff';
+      this.ctx.lineWidth = 1;
+      this.ctx.setLineDash([5, 5]);
+      
+      // Draw equilibrium line
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, this.centerY + this.length * 100);
+      this.ctx.lineTo(this.canvas.width, this.centerY + this.length * 100);
+      this.ctx.stroke();
+      
+      this.ctx.setLineDash([]);
+    }
+  }
+
+  // Initialize when the page loads
+  window.addEventListener('load', () => {
+    new PendulumSimulation();
+  });
+</script>

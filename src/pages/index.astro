@@ -1,0 +1,185 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+
+const year = new Date().getFullYear();
+---
+
+<Layout title="Stramosk - Software Engineer & Mathematics Enthusiast">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+
+      <!-- Terminal Window -->
+      <div class="terminal-window max-w-4xl mx-auto">
+        <div class="terminal-header">
+          STRAMOSK_TERMINAL.exe - [Version 2.0.1] - Ready
+        </div>
+        
+        <div class="p-6 min-h-[500px] overflow-y-auto">
+          <!-- Output History -->
+          <div id="output-history" class="space-y-2 mb-4">
+            <div class="terminal-text output-text">Welcome to Stramosk Terminal v2.0.1</div>
+            <div class="terminal-text output-text">Type "help" to see available commands</div>
+            <div class="terminal-text output-text">Type "about" to learn more about me</div>
+            <div class="terminal-text output-text"></div>
+            <div class="terminal-text output-text">Ready for input...</div>
+          </div>
+
+          <!-- Command Input -->
+          <div class="flex items-center">
+            <span class="command-prompt mr-2">$</span>
+            <input
+              type="text"
+              id="command-input"
+              placeholder="Enter command..."
+              class="terminal-input flex-1 bg-transparent outline-none"
+              autofocus
+            />
+            <span class="terminal-cursor ml-1"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-16 text-white text-sm">
+        <div class="text-muted">
+          © {year} Stramosk Terminal
+          <span class="ml-2">Status: ONLINE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+
+  const commands = {
+    help: 'Available commands: help, about, skills, contact, math, clear, navigate',
+    about: 'Hi, I\'m stramosk',
+    skills: 'Languages: JavaScript/TypeScript, Python | Frameworks: Angular, Django, Next.js, Vue.js | Domains: engineering, automation, integration, mathematics',
+    contact: 'Get in touch: vinicius.stramosk@gmail.com | LinkedIn: https://www.linkedin.com/in/vinicius-stramosk/',
+    math: 'Navigate to mathematical visualizations? (Y/N)',
+    clear: 'clear',
+    navigate: 'Available pages: math, contact'
+  };
+
+  const commandInput = document.getElementById('command-input') as HTMLInputElement;
+  const outputHistory = document.getElementById('output-history');
+
+  let commandHistory: string[] = [];
+  let waitingForConfirmation = false;
+  let pendingNavigation = '';
+
+  function addOutput(content: string, type: 'command' | 'output' | 'error' = 'output') {
+    const outputDiv = document.createElement('div');
+    outputDiv.className = `terminal-text ${
+      type === 'command' ? 'command-prompt' :
+      type === 'error' ? 'error-text' :
+      'output-text'
+    }`;
+    outputDiv.textContent = content;
+    outputHistory?.appendChild(outputDiv);
+  }
+
+  function updateInputPlaceholder(placeholder: string) {
+    if (commandInput) {
+      commandInput.placeholder = placeholder;
+    }
+  }
+
+  function handleCommand(cmd: string) {
+    const trimmedCmd = cmd.trim().toLowerCase();
+    
+    if (!trimmedCmd) return;
+
+    // Add command to history
+    commandHistory.push(cmd);
+    
+    // Add command to output
+    addOutput(`$ ${cmd}`, 'command');
+    
+    // Handle Y/N confirmation for navigation FIRST (before any other processing)
+    if (waitingForConfirmation) {
+      if (trimmedCmd === 'y' || trimmedCmd === 'yes') {
+        // Store the target URL BEFORE resetting state
+        const targetUrl = pendingNavigation;
+        addOutput('Navigating...', 'output');
+        
+        // Reset state immediately
+        waitingForConfirmation = false;
+        pendingNavigation = '';
+        updateInputPlaceholder('Enter command...');
+        if (commandInput) commandInput.value = '';
+        
+        // Now execute redirect with stored URL
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 1000);
+        
+        return;
+      } else if (trimmedCmd === 'n' || trimmedCmd === 'no') {
+        addOutput('Navigation cancelled.', 'output');
+        // Reset state for 'no' as well
+        waitingForConfirmation = false;
+        pendingNavigation = '';
+        updateInputPlaceholder('Enter command...');
+        if (commandInput) commandInput.value = '';
+        return;
+      } else {
+        addOutput('Please answer Y or N.', 'error');
+        return;
+      }
+    }
+    
+    // Process command
+    if (trimmedCmd === 'clear') {
+      // Don't allow clearing when waiting for confirmation
+      if (waitingForConfirmation) {
+        addOutput('Cannot clear terminal while waiting for confirmation. Please answer Y or N.', 'error');
+        return;
+      }
+      if (outputHistory) {
+        outputHistory.innerHTML = '';
+        addOutput('Terminal cleared.');
+      }
+    } else if (trimmedCmd === 'math') {
+      addOutput('Navigate to mathematical visualizations? (Y/N)', 'output');
+      addOutput('Type Y to confirm or N to cancel:', 'output');
+      updateInputPlaceholder('Type Y or N...');
+      waitingForConfirmation = true;
+      pendingNavigation = '/math';
+
+
+    } else if (commands[trimmedCmd as keyof typeof commands]) {
+      const result = commands[trimmedCmd as keyof typeof commands];
+      addOutput(result);
+    } else {
+      // Don't show "Command not found" for single characters when waiting for confirmation
+      if (waitingForConfirmation && trimmedCmd.length === 1) {
+        addOutput(`Please answer Y or N.`, 'error');
+      } else {
+        addOutput(`Command not found: ${trimmedCmd}. Type 'help' for available commands.`, 'error');
+      }
+    }
+    
+    if (commandInput) {
+      commandInput.value = '';
+    }
+  }
+
+  commandInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleCommand(commandInput.value);
+    }
+  });
+
+  // Focus the input when the page loads
+  window.addEventListener('load', () => {
+    commandInput?.focus();
+  });
+</script>

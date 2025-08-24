@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+---
+
+<Layout title="Contact - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+
+      <div class="flex justify-center">
+        <!-- Contact Information -->
+        <div class="w-full max-w-2xl">
+          <div class="terminal-window p-8 h-fit">
+            <div class="terminal-header mb-6">
+              CONTACT INFORMATION
+            </div>
+            
+            <div class="space-y-6">
+              <div class="flex items-center space-x-4">
+                <span class="text-2xl">📧</span>
+                <div class="flex-1">
+                  <div class="text-white font-semibold text-sm uppercase tracking-wide">
+                    Email
+                  </div>
+                  <a href="mailto:vinicius.stramosk@gmail.com" class="text-gray-300 hover:text-white transition-colors break-all">
+                    vinicius.stramosk@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-4">
+                <span class="text-2xl">💼</span>
+                <div class="flex-1">
+                  <div class="text-white font-semibold text-sm uppercase tracking-wide">
+                    LinkedIn
+                  </div>
+                  <a href="https://www.linkedin.com/in/vinicius-stramosk/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white transition-colors break-all">
+                    linkedin.com/in/vinicius-stramosk/
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-4">
+                <span class="text-2xl">🐙</span>
+                <div class="flex-1">
+                  <div class="text-white font-semibold text-sm uppercase tracking-wide">
+                    GitHub
+                  </div>
+                  <a href="https://github.com/stramosk" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white transition-colors break-all">
+                    github.com/stramosk
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-4">
+                <span class="text-2xl">🌍</span>
+                <div class="flex-1">
+                  <div class="text-white font-semibold text-sm uppercase tracking-wide">
+                    Location
+                  </div>
+                  <div class="text-gray-300">Adelaide, Australia</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 p-4 bg-white/10 border border-white/20 rounded">
+              <h4 class="text-white font-semibold mb-2">Available for:</h4>
+              <ul class="text-gray-300 text-sm space-y-1">
+                <li>• Freelance projects and consulting</li>
+                <li>• Open source contributions</li>
+                <li>• Technical writing and speaking</li>
+                <li>• Research collaborations</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-16 text-white text-sm">
+        <div class="text-muted">
+          CONTACT SYSTEM v2.0.1 | 
+          <span class="ml-2">STATUS: ONLINE</span> |
+          <span class="ml-2">RESPONSE: ACTIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const contactForm = document.getElementById('contact-form') as HTMLFormElement;
+  
+  contactForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(contactForm);
+    const data = Object.fromEntries(formData);
+    
+    console.log('Form submitted:', data);
+    
+    // Here you would typically send the data to your backend
+    alert('Thank you for your message! I\'ll get back to you soon.');
+    
+    // Reset the form
+    contactForm.reset();
+  });
+</script>

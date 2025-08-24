@@ -1,0 +1,409 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+---
+
+<Layout title="Lorenz Attractor - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white glitch" data-text="LORENZ ATTRACTOR">
+          LORENZ ATTRACTOR
+        </h1>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+          Explore the famous chaotic system that demonstrates the "butterfly effect."
+          Watch as tiny changes in initial conditions create completely different trajectories.
+        </p>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="terminal-window p-6 max-w-4xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          CONTROL PANEL
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-white text-sm mb-2">σ (Sigma)</label>
+            <input type="range" id="sigma" min="1" max="20" step="0.5" value="10" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="sigmaValue">10.0</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">ρ (Rho)</label>
+            <input type="range" id="rho" min="10" max="50" step="1" value="28" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="rhoValue">28.0</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">β (Beta)</label>
+            <input type="range" id="beta" min="1" max="10" step="0.5" value="2.667" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="betaValue">2.667</div>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="startBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Start
+          </button>
+          <button id="pauseBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Pause
+          </button>
+          <button id="resetBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Reset
+          </button>
+          <button id="clearBtn" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded border border-white/30 transition-colors text-sm">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="terminal-window p-4 max-w-6xl mx-auto">
+        <div class="terminal-header mb-4">
+          3D CHAOTIC SYSTEM
+        </div>
+        <div class="relative">
+          <canvas id="lorenzCanvas" class="w-full border border-white/20 rounded" style="height: 500px;"></canvas>
+          <div class="absolute top-2 left-2 bg-black/80 text-white text-xs p-2 rounded font-mono">
+            Real-time 3D chaotic system • Drag to rotate • Scroll to zoom
+          </div>
+        </div>
+      </div>
+
+      <!-- Information Panels -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            MATHEMATICAL BACKGROUND
+          </div>
+          <div class="text-gray-300 text-sm space-y-3">
+            <p>
+              The Lorenz system is defined by three differential equations:
+            </p>
+            <div class="font-mono text-white text-xs space-y-1">
+              <div>dx/dt = σ(y - x)</div>
+              <div>dy/dt = x(ρ - z) - y</div>
+              <div>dz/dt = xy - βz</div>
+            </div>
+            <p>
+              Where σ, ρ, and β are parameters that control the system's behavior.
+              For certain values, the system exhibits chaotic behavior.
+            </p>
+          </div>
+        </div>
+
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            CHAOS THEORY
+          </div>
+          <div class="text-gray-300 text-sm space-y-2">
+            <div>• <span class="text-white">Butterfly Effect:</span> Small changes lead to vastly different outcomes</div>
+            <div>• <span class="text-white">Strange Attractor:</span> The system never repeats but stays bounded</div>
+            <div>• <span class="text-white">Sensitivity:</span> Initial conditions determine long-term behavior</div>
+            <div>• <span class="text-white">Deterministic:</span> No randomness, yet unpredictable</div>
+            <div>• <span class="text-white">Applications:</span> Weather prediction, fluid dynamics, economics</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="text-center mt-8">
+        <a href="/math" class="inline-block bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded border border-white/30 transition-colors">
+          ← Back to Math Visualizations
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  class LorenzAttractor {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private animationId: number = 0;
+    
+    private sigma: number = 10;
+    private rho: number = 28;
+    private beta: number = 2.667;
+    
+    private x: number = 0.1;
+    private y: number = 0.1;
+    private z: number = 0.1;
+    
+    private dt: number = 0.01;
+    private isRunning: boolean = false;
+    
+    private points: Array<{x: number, y: number, z: number}> = [];
+    private maxPoints: number = 10000;
+    
+    private rotationX: number = 0;
+    private rotationY: number = 0;
+    private zoom: number = 1;
+    private isDragging: boolean = false;
+    private lastMouseX: number = 0;
+    private lastMouseY: number = 0;
+
+    constructor() {
+      this.canvas = document.getElementById('lorenzCanvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+      this.setupEventListeners();
+      this.reset();
+    }
+
+    private setupCanvas() {
+      const rect = this.canvas.getBoundingClientRect();
+      this.canvas.width = rect.width;
+      this.canvas.height = 500;
+    }
+
+    private setupEventListeners() {
+      // Control sliders
+      document.getElementById('sigma')?.addEventListener('input', (e) => {
+        this.sigma = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('sigmaValue')!.textContent = this.sigma.toFixed(1);
+      });
+      
+      document.getElementById('rho')?.addEventListener('input', (e) => {
+        this.rho = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('rhoValue')!.textContent = this.rho.toFixed(1);
+      });
+      
+      document.getElementById('beta')?.addEventListener('input', (e) => {
+        this.beta = parseFloat((e.target as HTMLInputElement).value);
+        document.getElementById('betaValue')!.textContent = this.beta.toFixed(3);
+      });
+      
+      // Control buttons
+      document.getElementById('startBtn')?.addEventListener('click', () => this.start());
+      document.getElementById('pauseBtn')?.addEventListener('click', () => this.pause());
+      document.getElementById('resetBtn')?.addEventListener('click', () => this.reset());
+      document.getElementById('clearBtn')?.addEventListener('click', () => this.clear());
+      
+      // Mouse events for rotation and zoom
+      this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+      this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+      this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+      this.canvas.addEventListener('wheel', this.onWheel.bind(this));
+    }
+
+    private onMouseDown(e: MouseEvent) {
+      this.isDragging = true;
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
+    }
+
+    private onMouseMove(e: MouseEvent) {
+      if (!this.isDragging) return;
+      
+      const deltaX = e.clientX - this.lastMouseX;
+      const deltaY = e.clientY - this.lastMouseY;
+      
+      this.rotationY += deltaX * 0.01;
+      this.rotationX += deltaY * 0.01;
+      
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
+    }
+
+    private onMouseUp() {
+      this.isDragging = false;
+    }
+
+    private onWheel(e: WheelEvent) {
+      e.preventDefault();
+      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+      this.zoom *= zoomFactor;
+      this.zoom = Math.max(0.1, Math.min(5, this.zoom));
+    }
+
+    private start() {
+      if (!this.isRunning) {
+        this.isRunning = true;
+        this.animate();
+      }
+    }
+
+    private pause() {
+      this.isRunning = false;
+      if (this.animationId) {
+        cancelAnimationFrame(this.animationId);
+      }
+    }
+
+    private reset() {
+      this.pause();
+      this.x = 0.1;
+      this.y = 0.1;
+      this.z = 0.1;
+      this.points = [];
+      this.rotationX = 0;
+      this.rotationY = 0;
+      this.zoom = 1;
+      this.draw();
+    }
+
+    private clear() {
+      this.points = [];
+      this.draw();
+    }
+
+    private animate() {
+      if (!this.isRunning) return;
+      
+      // Update Lorenz system
+      this.updateLorenz();
+      
+      // Add new point
+      this.points.push({x: this.x, y: this.y, z: this.z});
+      
+      // Limit number of points for performance
+      if (this.points.length > this.maxPoints) {
+        this.points.shift();
+      }
+      
+      // Draw
+      this.draw();
+      
+      this.animationId = requestAnimationFrame(() => this.animate());
+    }
+
+    private updateLorenz() {
+      const dx = this.sigma * (this.y - this.x);
+      const dy = this.x * (this.rho - this.z) - this.y;
+      const dz = this.x * this.y - this.beta * this.z;
+      
+      this.x += dx * this.dt;
+      this.y += dy * this.dt;
+      this.z += dz * this.dt;
+    }
+
+    private project3DTo2D(x: number, y: number, z: number): {x: number, y: number} {
+      // Apply rotations
+      const cosY = Math.cos(this.rotationY);
+      const sinY = Math.sin(this.rotationY);
+      const cosX = Math.cos(this.rotationX);
+      const sinX = Math.sin(this.rotationX);
+      
+      // Rotate around Y axis
+      let tempX = x * cosY - z * sinY;
+      let tempZ = x * sinY + z * cosY;
+      
+      // Rotate around X axis
+      let tempY = y * cosX - tempZ * sinX;
+      tempZ = y * sinX + tempZ * cosX;
+      
+      // Apply zoom and project to 2D
+      const scale = 100 * this.zoom;
+      const centerX = this.canvas.width / 2;
+      const centerY = this.canvas.height / 2;
+      
+      return {
+        x: centerX + tempX * scale,
+        y: centerY + tempY * scale
+      };
+    }
+
+    private draw() {
+      // Clear canvas
+      this.ctx.fillStyle = '#000000';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      // Draw grid
+      this.drawGrid();
+      
+      // Draw Lorenz attractor
+      this.drawAttractor();
+      
+      // Draw coordinate axes
+      this.drawAxes();
+    }
+
+    private drawGrid() {
+      this.ctx.strokeStyle = '#333333';
+      this.ctx.lineWidth = 1;
+      
+      // Vertical lines
+      for (let x = 0; x < this.canvas.width; x += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, 0);
+        this.ctx.lineTo(x, this.canvas.height);
+        this.ctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = 0; y < this.canvas.height; y += 50) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, y);
+        this.ctx.lineTo(this.canvas.width, y);
+        this.ctx.stroke();
+      }
+    }
+
+    private drawAxes() {
+      const center = this.project3DTo2D(0, 0, 0);
+      const xAxis = this.project3DTo2D(1, 0, 0);
+      const yAxis = this.project3DTo2D(0, 1, 0);
+      const zAxis = this.project3DTo2D(0, 0, 1);
+      
+      // X axis (red)
+      this.ctx.strokeStyle = '#ff6b6b';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(center.x, center.y);
+      this.ctx.lineTo(xAxis.x, xAxis.y);
+      this.ctx.stroke();
+      
+      // Y axis (green)
+      this.ctx.strokeStyle = '#51cf66';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(center.x, center.y);
+      this.ctx.lineTo(yAxis.x, yAxis.y);
+      this.ctx.stroke();
+      
+      // Z axis (blue)
+      this.ctx.strokeStyle = '#339af0';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.moveTo(center.x, center.y);
+      this.ctx.lineTo(zAxis.x, zAxis.y);
+      this.ctx.stroke();
+    }
+
+    private drawAttractor() {
+      if (this.points.length < 2) return;
+      
+      // Draw trajectory
+      this.ctx.strokeStyle = '#ffffff';
+      this.ctx.lineWidth = 1;
+      this.ctx.beginPath();
+      
+      const firstPoint = this.project3DTo2D(this.points[0].x, this.points[0].y, this.points[0].z);
+      this.ctx.moveTo(firstPoint.x, firstPoint.y);
+      
+      for (let i = 1; i < this.points.length; i++) {
+        const point = this.points[i];
+        const projected = this.project3DTo2D(point.x, point.y, point.z);
+        this.ctx.lineTo(projected.x, projected.y);
+      }
+      
+      this.ctx.stroke();
+      
+      // Draw current point
+      const currentPoint = this.project3DTo2D(this.x, this.y, this.z);
+      this.ctx.fillStyle = '#ff6b6b';
+      this.ctx.beginPath();
+      this.ctx.arc(currentPoint.x, currentPoint.y, 4, 0, 2 * Math.PI);
+      this.ctx.fill();
+    }
+  }
+
+  // Initialize when the page loads
+  window.addEventListener('load', () => {
+    new LorenzAttractor();
+  });
+</script>

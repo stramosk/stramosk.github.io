@@ -1,0 +1,348 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+---
+
+<Layout title="Mandelbrot Set Explorer - Stramosk">
+  <Navbar />
+  
+  <div class="min-h-screen bg-black crt pt-24">
+    <!-- Subtle background effect -->
+    <div class="matrix-bg"></div>
+    
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 text-white glitch" data-text="MANDELBROT SET EXPLORER">
+          MANDELBROT SET EXPLORER
+        </h1>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+          Explore the infinite complexity of the most famous fractal in mathematics.
+          Zoom into any region to discover endless patterns and beauty.
+        </p>
+      </div>
+
+      <!-- Controls Panel -->
+      <div class="terminal-window p-6 max-w-4xl mx-auto mb-8">
+        <div class="terminal-header mb-4">
+          CONTROL PANEL
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-white text-sm mb-2">Max Iterations</label>
+            <input type="range" id="maxIterations" min="50" max="500" value="100" class="w-full">
+            <div class="text-gray-300 text-xs mt-1" id="iterationsValue">100</div>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Color Scheme</label>
+            <select id="colorScheme" class="w-full bg-black text-white border border-white/30 p-2 rounded">
+              <option value="rainbow">Rainbow</option>
+              <option value="fire">Fire</option>
+              <option value="ocean">Ocean</option>
+              <option value="grayscale">Grayscale</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-white text-sm mb-2">Zoom Level</label>
+            <div class="text-gray-300 text-xs" id="zoomLevel">1.0x</div>
+            <button id="resetZoom" class="mt-2 bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded border border-white/30 transition-colors text-sm">
+              Reset View
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="terminal-window p-4 max-w-6xl mx-auto">
+        <div class="terminal-header mb-4">
+          FRACTAL CANVAS
+        </div>
+        <div class="relative">
+          <canvas id="mandelbrotCanvas" class="w-full border border-white/20 rounded cursor-crosshair"></canvas>
+          <div class="absolute top-2 left-2 bg-black/80 text-white text-xs p-2 rounded font-mono">
+            Click and drag to zoom • Scroll to zoom in/out
+          </div>
+        </div>
+      </div>
+
+      <!-- Information Panel -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            MATHEMATICAL BACKGROUND
+          </div>
+          <div class="text-gray-300 text-sm space-y-3">
+            <p>
+              The Mandelbrot set is defined by the complex quadratic recurrence relation:
+              <span class="text-white font-mono">z<sub>n+1</sub> = z<sub>n</sub>² + c</span>
+            </p>
+            <p>
+              For each complex number <span class="text-white font-mono">c</span>, we iterate starting with 
+              <span class="text-white font-mono">z<sub>0</sub> = 0</span> and check if the sequence remains bounded.
+            </p>
+            <p>
+              Points in the set (black) remain bounded, while points outside escape to infinity at different rates (colored).
+            </p>
+          </div>
+        </div>
+
+        <div class="terminal-window p-6">
+          <div class="terminal-header mb-4">
+            INTERACTIVE FEATURES
+          </div>
+          <div class="text-gray-300 text-sm space-y-2">
+            <div>• <span class="text-white">Click & Drag:</span> Select region to zoom</div>
+            <div>• <span class="text-white">Scroll:</span> Zoom in/out at cursor position</div>
+            <div>• <span class="text-white">Max Iterations:</span> Control detail level</div>
+            <div>• <span class="text-white">Color Schemes:</span> Multiple visualization options</div>
+            <div>• <span class="text-white">Real-time:</span> Instant parameter updates</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="text-center mt-8">
+        <a href="/math" class="inline-block bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded border border-white/30 transition-colors">
+          ← Back to Math Visualizations
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  class MandelbrotExplorer {
+    private canvas: HTMLCanvasElement;
+    private ctx: CanvasRenderingContext2D;
+    private imageData!: ImageData;
+    private data!: Uint8ClampedArray;
+    
+    private centerX: number = -0.5;
+    private centerY: number = 0;
+    private zoom: number = 1;
+    private maxIterations: number = 100;
+    private colorScheme: string = 'rainbow';
+    
+    private isDragging: boolean = false;
+    private startX: number = 0;
+    private startY: number = 0;
+    private startCenterX: number = 0;
+    private startCenterY: number = 0;
+
+    constructor() {
+      this.canvas = document.getElementById('mandelbrotCanvas') as HTMLCanvasElement;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.setupCanvas();
+      this.setupEventListeners();
+      this.render();
+    }
+
+    private setupCanvas() {
+      const rect = this.canvas.getBoundingClientRect();
+      this.canvas.width = rect.width;
+      this.canvas.height = rect.height;
+      
+      this.imageData = this.ctx.createImageData(this.canvas.width, this.canvas.height);
+      this.data = this.imageData.data;
+    }
+
+    private setupEventListeners() {
+      // Mouse events for zooming
+      this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
+      this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
+      this.canvas.addEventListener('mouseup', this.onMouseUp.bind(this));
+      
+      // Wheel event for zooming
+      this.canvas.addEventListener('wheel', this.onWheel.bind(this));
+      
+      // Control events
+      document.getElementById('maxIterations')?.addEventListener('input', (e) => {
+        this.maxIterations = parseInt((e.target as HTMLInputElement).value);
+        document.getElementById('iterationsValue')!.textContent = this.maxIterations.toString();
+        this.render();
+      });
+      
+      document.getElementById('colorScheme')?.addEventListener('change', (e) => {
+        this.colorScheme = (e.target as HTMLSelectElement).value;
+        this.render();
+      });
+      
+      document.getElementById('resetZoom')?.addEventListener('click', () => {
+        this.centerX = -0.5;
+        this.centerY = 0;
+        this.zoom = 1;
+        this.updateZoomDisplay();
+        this.render();
+      });
+    }
+
+    private onMouseDown(e: MouseEvent) {
+      this.isDragging = true;
+      const rect = this.canvas.getBoundingClientRect();
+      this.startX = e.clientX - rect.left;
+      this.startY = e.clientY - rect.top;
+      this.startCenterX = this.centerX;
+      this.startCenterY = this.centerY;
+    }
+
+    private onMouseMove(e: MouseEvent) {
+      if (!this.isDragging) return;
+      
+      const rect = this.canvas.getBoundingClientRect();
+      const deltaX = e.clientX - rect.left - this.startX;
+      const deltaY = e.clientY - rect.top - this.startY;
+      
+      const scale = 4 / (this.zoom * this.canvas.width);
+      this.centerX = this.startCenterX - deltaX * scale;
+      this.centerY = this.startCenterY + deltaY * scale;
+      
+      this.render();
+    }
+
+    private onMouseUp() {
+      this.isDragging = false;
+    }
+
+    private onWheel(e: WheelEvent) {
+      e.preventDefault();
+      
+      const rect = this.canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = this.zoom * zoomFactor;
+      
+      // Zoom towards mouse position
+      const scale = 4 / (this.zoom * this.canvas.width);
+      const newScale = 4 / (newZoom * this.canvas.width);
+      
+      this.centerX = this.centerX + (mouseX - this.canvas.width / 2) * (scale - newScale);
+      this.centerY = this.centerY - (mouseY - this.canvas.height / 2) * (scale - newScale);
+      
+      this.zoom = newZoom;
+      this.updateZoomDisplay();
+      this.render();
+    }
+
+    private updateZoomDisplay() {
+      const zoomElement = document.getElementById('zoomLevel');
+      if (zoomElement) {
+        zoomElement.textContent = `${this.zoom.toFixed(1)}x`;
+      }
+    }
+
+    private getColor(iterations: number): [number, number, number, number] {
+      if (iterations === this.maxIterations) {
+        return [0, 0, 0, 255]; // Black for points in the set
+      }
+      
+      const normalized = iterations / this.maxIterations;
+      
+      switch (this.colorScheme) {
+        case 'rainbow':
+          const hue = (normalized * 360) % 360;
+          return this.hsvToRgb(hue, 1, 1);
+        case 'fire':
+          return [
+            Math.min(255, normalized * 255 * 3),
+            Math.min(255, normalized * 255 * 2),
+            Math.min(255, normalized * 255),
+            255
+          ];
+        case 'ocean':
+          return [
+            Math.min(255, normalized * 255 * 0.5),
+            Math.min(255, normalized * 255 * 0.8),
+            Math.min(255, normalized * 255),
+            255
+          ];
+        case 'grayscale':
+          const gray = Math.floor(normalized * 255);
+          return [gray, gray, gray, 255];
+        default:
+          return [255, 255, 255, 255];
+      }
+    }
+
+    private hsvToRgb(h: number, s: number, v: number): [number, number, number, number] {
+      const c = v * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = v - c;
+      
+      let r = 0, g = 0, b = 0;
+      
+      if (h >= 0 && h < 60) {
+        r = c; g = x; b = 0;
+      } else if (h >= 60 && h < 120) {
+        r = x; g = c; b = 0;
+      } else if (h >= 120 && h < 180) {
+        r = 0; g = c; b = x;
+      } else if (h >= 180 && h < 240) {
+        r = 0; g = x; b = c;
+      } else if (h >= 240 && h < 300) {
+        r = x; g = 0; b = c;
+      } else {
+        r = c; g = 0; b = x;
+      }
+      
+      return [
+        Math.round((r + m) * 255),
+        Math.round((g + m) * 255),
+        Math.round((b + m) * 255),
+        255
+      ];
+    }
+
+    private render() {
+      const width = this.canvas.width;
+      const height = this.canvas.height;
+      const scale = 4 / (this.zoom * width);
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const real = this.centerX + (x - width / 2) * scale;
+          const imag = this.centerY + (y - height / 2) * scale;
+          
+          const iterations = this.mandelbrot(real, imag);
+          const color = this.getColor(iterations);
+          
+          const index = (y * width + x) * 4;
+          this.data[index] = color[0];
+          this.data[index + 1] = color[1];
+          this.data[index + 2] = color[2];
+          this.data[index + 3] = color[3];
+        }
+      }
+      
+      this.ctx.putImageData(this.imageData, 0, 0);
+    }
+
+    private mandelbrot(real: number, imag: number): number {
+      let zReal = 0;
+      let zImag = 0;
+      
+      for (let i = 0; i < this.maxIterations; i++) {
+        const zRealSq = zReal * zReal;
+        const zImagSq = zImag * zImag;
+        
+        if (zRealSq + zImagSq > 4) {
+          return i;
+        }
+        
+        const newZReal = zRealSq - zImagSq + real;
+        const newZImag = 2 * zReal * zImag + imag;
+        
+        zReal = newZReal;
+        zImag = newZImag;
+      }
+      
+      return this.maxIterations;
+    }
+  }
+
+  // Initialize when the page loads
+  window.addEventListener('load', () => {
+    new MandelbrotExplorer();
+  });
+</script>
